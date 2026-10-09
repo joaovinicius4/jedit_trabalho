@@ -1,17 +1,35 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Stream;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        Path pastaJEdit = Path.of(args[0]);
+        if (!Files.isDirectory(pastaJEdit)) {
+            System.err.println("Pasta nao encontrada: " + pastaJEdit);
+            return;
+        }
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        try (Stream<Path> arquivos = Files.walk(pastaJEdit)) {
+            List<Path> arquivosJava = arquivos
+                    .filter(Files::isRegularFile)
+                    .filter(arquivo -> arquivo.toString().endsWith(".java"))
+                    .sorted()
+                    .toList();
+
+            System.out.println("Pasta analisada: " + pastaJEdit.toAbsolutePath());
+            System.out.println("Arquivos Java encontrados: " + arquivosJava.size());
+            System.out.println("Primeiros arquivos:");
+            arquivosJava.stream()
+                    .limit(10)
+                    .map(pastaJEdit::relativize)
+                    .forEach(arquivo -> System.out.println("- " + arquivo));
+        } catch (IOException e) {
+            System.err.println("Erro ao ler os arquivos: " + e.getMessage());
         }
     }
 }
